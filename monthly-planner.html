@@ -11,7 +11,7 @@
   :root {
     --base: #1e1e2e; --mantle: #181825; --crust: #11111b;
     --surface0: #313244; --surface1: #45475a; --surface2: #585b70;
-    --overlay0: #6c7086; --overlay1: #7f849c; --overlay2: #9399b2;
+    --overlay0: #6c7086; --overlay1: #7f849c;
     --subtext0: #a6adc8; --subtext1: #bac2de; --text: #cdd6f4;
     --blue: #89b4fa; --teal: #94e2d5; --green: #a6e3a1;
     --yellow: #f9e2af; --peach: #fab387; --maroon: #eba0ac;
@@ -22,15 +22,50 @@
   body { background: var(--crust); color: var(--text); font-family: 'IBM Plex Sans Thai', sans-serif; min-height: 100vh; padding-bottom: 80px; }
   .app { max-width: 700px; margin: 0 auto; padding: 0 16px; }
 
+  /* ── PIN Screen ── */
+  #pinScreen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .pin-card {
+    background: var(--mantle); border: 1px solid var(--surface1); border-radius: var(--r-lg);
+    padding: 36px 28px; width: 100%; max-width: 320px; text-align: center;
+  }
+  .pin-icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .pin-title { font-size: 1.1rem; font-weight: 600; color: var(--mauve); margin-bottom: 6px; }
+  .pin-subtitle { font-size: .82rem; color: var(--overlay1); margin-bottom: 24px; }
+  .pin-dots { display: flex; gap: 10px; justify-content: center; margin-bottom: 24px; }
+  .pin-dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid var(--surface2); background: transparent; transition: all .15s;
+  }
+  .pin-dot.filled { background: var(--mauve); border-color: var(--mauve); }
+  .pin-numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .pin-key {
+    background: var(--surface0); border: 1px solid var(--surface1); color: var(--text);
+    border-radius: var(--r); padding: 16px; font-size: 1.2rem; font-weight: 500;
+    cursor: pointer; font-family: 'JetBrains Mono', monospace;
+    transition: background .1s, transform .1s; user-select: none;
+  }
+  .pin-key:active { background: var(--surface1); transform: scale(.95); }
+  .pin-key.del { font-size: 1rem; color: var(--overlay1); }
+  .pin-key.empty { background: transparent; border-color: transparent; cursor: default; }
+  .pin-error { color: var(--red); font-size: .82rem; margin-top: 14px; min-height: 20px; }
+  .pin-loading { color: var(--overlay1); font-size: .82rem; margin-top: 14px; }
+
+  /* ── Main App ── */
+  #mainApp { display: none; }
   .app-header { background: var(--mantle); border-bottom: 1px solid var(--surface0); padding: 18px 20px 14px; margin: 0 -16px 20px; position: sticky; top: 0; z-index: 100; }
   .header-top { display: flex; align-items: center; justify-content: space-between; }
   .header-title { font-size: 1.1rem; font-weight: 600; color: var(--mauve); letter-spacing: .02em; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
   .sync-status { font-size: .72rem; display: flex; align-items: center; gap: 5px; }
   .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--overlay0); }
   .sync-dot.ok { background: var(--green); }
   .sync-dot.busy { background: var(--yellow); animation: pulse .8s infinite; }
   .sync-dot.err { background: var(--red); }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .logout-btn { background: transparent; border: none; color: var(--overlay1); cursor: pointer; font-size: .8rem; padding: 4px 8px; border-radius: var(--r-sm); transition: color .15s; }
+  .logout-btn:hover { color: var(--red); }
   .month-nav { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
   .month-label { font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--text); font-weight: 500; flex: 1; text-align: center; }
   .nav-btn { background: var(--surface0); border: none; color: var(--subtext1); border-radius: var(--r-sm); width: 34px; height: 34px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: background .15s; }
@@ -108,7 +143,6 @@
   .divider { border: none; border-top: 1px solid var(--surface0); margin: 12px 0; }
   .empty-state { text-align: center; color: var(--overlay0); font-size: .85rem; padding: 24px; }
 
-  /* Paste Modal */
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity .2s; }
   .modal-overlay.open { opacity: 1; pointer-events: all; }
   .modal { background: var(--mantle); border: 1px solid var(--surface1); border-radius: var(--r-lg); padding: 22px; width: 100%; max-width: 360px; }
@@ -122,7 +156,6 @@
   .year-row { display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 6px; }
   .year-val { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--text); min-width: 60px; text-align: center; }
 
-  /* Toast */
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--surface1); color: var(--text); padding: 10px 18px; border-radius: 20px; font-size: .82rem; opacity: 0; transition: all .3s; z-index: 300; white-space: nowrap; pointer-events: none; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
@@ -134,119 +167,142 @@
 </style>
 </head>
 <body>
-<div class="app">
-  <div class="app-header">
-    <div class="header-top">
-      <div class="header-title">💰 วางแผนการเงิน</div>
-      <div class="sync-status">
-        <div class="sync-dot" id="syncDot"></div>
-        <span id="syncLabel" style="color:var(--overlay1)">—</span>
-      </div>
-    </div>
-    <div class="month-nav">
-      <button class="nav-btn" id="prevMonthBtn">‹</button>
-      <div class="month-label" id="monthLabel">—</div>
-      <button class="nav-btn" id="nextMonthBtn">›</button>
-    </div>
-  </div>
 
-  <!-- Summary -->
-  <div class="card summary-card">
-    <div class="card-title"><span class="dot" style="background:var(--mauve)"></span>สรุปภาพรวม</div>
-    <div class="summary-grid">
-      <div class="summary-item">
-        <div class="summary-item-label">รายได้คาดการณ์</div>
-        <div class="summary-item-value" style="color:var(--green)" id="sumIncome">฿0</div>
-        <div class="summary-item-sub" id="sumIncomeReceived">ได้รับแล้ว ฿0</div>
-      </div>
-      <div class="summary-item">
-        <div class="summary-item-label">รายจ่ายทั้งหมด</div>
-        <div class="summary-item-value" style="color:var(--maroon)" id="sumExpense">฿0</div>
-        <div class="summary-item-sub" id="sumExpensePaid">จ่ายแล้ว ฿0</div>
-      </div>
+<!-- PIN Screen -->
+<div id="pinScreen">
+  <div class="pin-card">
+    <div class="pin-icon">🔐</div>
+    <div class="pin-title">วางแผนการเงิน</div>
+    <div class="pin-subtitle">ใส่ PIN เพื่อเข้าใช้งาน</div>
+    <div class="pin-dots" id="pinDots">
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
     </div>
-    <div class="balance-block">
-      <div>
-        <div class="balance-label">ยอดคงเหลือคาดการณ์</div>
-        <div class="balance-value" id="balanceValue">฿0</div>
-      </div>
-      <span class="badge" id="balanceBadge">—</span>
-    </div>
-    <div id="copyBanner" style="display:none;margin-top:12px;">
-      <button class="btn btn-copy" id="copyFromPrevBtn">📋 คัดลอกรายการจากเดือนก่อนหน้า</button>
-    </div>
-  </div>
-
-  <!-- Income -->
-  <div class="card">
-    <div class="card-title-row">
-      <div class="card-title"><span class="dot" style="background:var(--green)"></span>รายได้เดือนนี้</div>
-      <button class="btn btn-copy btn-sm" id="copyIncomeBtn">📋 คัดลอกรายได้</button>
-    </div>
-    <button class="settings-toggle" id="settingsToggle">⚙ ค่าแรงต่อวัน & ภาษี <span id="settingsChevron">▾</span></button>
-    <div class="settings-body" id="settingsBody">
-      <div class="settings-row">
-        <div class="field-group">
-          <div class="field-label">ค่าแรงต่อวัน (บาท)</div>
-          <input type="number" id="dailyWage" placeholder="เช่น 800" min="0">
-        </div>
-        <div class="field-group">
-          <div class="field-label">ภาษีหัก ณ ที่จ่าย (%)</div>
-          <input type="number" id="taxRate" placeholder="เช่น 3" min="0" max="100" step="0.1">
-        </div>
-        <button class="btn btn-ghost btn-sm" id="saveProfileBtn" style="margin-bottom:1px">บันทึก</button>
-      </div>
-      <div style="margin-top:8px;font-size:.75rem;color:var(--overlay1)" id="profileStatus"></div>
-      <hr class="divider">
-    </div>
-    <div class="mode-tabs">
-      <button class="mode-tab active" data-mode="manual">กรอกเอง</button>
-      <button class="mode-tab" data-mode="calc">คำนวณจากวันทำงาน</button>
-    </div>
-    <div id="modeManual" class="add-form">
-      <div class="add-row">
-        <input type="text" id="incomeNameManual" placeholder="ชื่อรายการรายได้" style="flex:2">
-        <input type="number" id="incomeAmountManual" placeholder="จำนวน (บาท)" style="flex:1">
-      </div>
-      <button class="btn btn-green btn-sm" id="addIncomeManualBtn">+ เพิ่มรายได้</button>
-    </div>
-    <div id="modeCalc" class="add-form" style="display:none">
-      <div class="add-row">
-        <input type="text" id="incomeNameCalc" placeholder="ชื่อรายการ" style="flex:2">
-        <input type="number" id="workDays" placeholder="จำนวนวัน" style="flex:1" min="0">
-      </div>
-      <div class="preview-box" id="calcPreview"></div>
-      <button class="btn btn-green btn-sm" id="addIncomeCalcBtn">+ เพิ่มรายได้</button>
-    </div>
-    <hr class="divider">
-    <div class="item-list" id="incomeList"></div>
-  </div>
-
-  <!-- Expense -->
-  <div class="card">
-    <div class="card-title-row">
-      <div class="card-title"><span class="dot" style="background:var(--maroon)"></span>รายจ่ายเดือนนี้</div>
-      <button class="btn btn-copy btn-sm" id="copyExpenseBtn">📋 คัดลอกรายจ่าย</button>
-    </div>
-    <div class="add-form">
-      <div class="add-row">
-        <input type="text" id="expenseName" placeholder="ชื่อรายการ" style="flex:2">
-        <input type="number" id="expenseAmount" placeholder="จำนวน (บาท)" style="flex:1">
-      </div>
-      <div class="add-row" style="align-items:center">
-        <div class="field-group">
-          <div class="field-label">วันที่กำหนดจ่าย (ไม่บังคับ)</div>
-          <input type="number" id="expenseDueDay" placeholder="วันที่ 1-31" min="1" max="31">
-        </div>
-        <button class="btn btn-primary btn-sm" id="addExpenseBtn" style="margin-top:16px">+ เพิ่มรายจ่าย</button>
-      </div>
-    </div>
-    <hr class="divider">
-    <div class="item-list" id="expenseList"></div>
+    <div class="pin-numpad" id="pinNumpad"></div>
+    <div class="pin-error" id="pinError"></div>
+    <div class="pin-loading" id="pinLoading"></div>
   </div>
 </div>
 
-<!-- Paste Modal -->
+<!-- Main App -->
+<div id="mainApp">
+  <div class="app">
+    <div class="app-header">
+      <div class="header-top">
+        <div class="header-title">💰 วางแผนการเงิน</div>
+        <div class="header-right">
+          <div class="sync-status">
+            <div class="sync-dot" id="syncDot"></div>
+            <span id="syncLabel" style="color:var(--overlay1)">—</span>
+          </div>
+          <button class="logout-btn" id="logoutBtn" title="ออกจากระบบ">🔒 ล็อค</button>
+        </div>
+      </div>
+      <div class="month-nav">
+        <button class="nav-btn" id="prevMonthBtn">‹</button>
+        <div class="month-label" id="monthLabel">—</div>
+        <button class="nav-btn" id="nextMonthBtn">›</button>
+      </div>
+    </div>
+
+    <div class="card summary-card">
+      <div class="card-title"><span class="dot" style="background:var(--mauve)"></span>สรุปภาพรวม</div>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-item-label">รายได้คาดการณ์</div>
+          <div class="summary-item-value" style="color:var(--green)" id="sumIncome">฿0</div>
+          <div class="summary-item-sub" id="sumIncomeReceived">ได้รับแล้ว ฿0</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-item-label">รายจ่ายทั้งหมด</div>
+          <div class="summary-item-value" style="color:var(--maroon)" id="sumExpense">฿0</div>
+          <div class="summary-item-sub" id="sumExpensePaid">จ่ายแล้ว ฿0</div>
+        </div>
+      </div>
+      <div class="balance-block">
+        <div>
+          <div class="balance-label">ยอดคงเหลือคาดการณ์</div>
+          <div class="balance-value" id="balanceValue">฿0</div>
+        </div>
+        <span class="badge" id="balanceBadge">—</span>
+      </div>
+      <div id="copyBanner" style="display:none;margin-top:12px;">
+        <button class="btn btn-copy" id="copyFromPrevBtn">📋 คัดลอกรายการจากเดือนก่อนหน้า</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title-row">
+        <div class="card-title"><span class="dot" style="background:var(--green)"></span>รายได้เดือนนี้</div>
+        <button class="btn btn-copy btn-sm" id="copyIncomeBtn">📋 คัดลอกรายได้</button>
+      </div>
+      <button class="settings-toggle" id="settingsToggle">⚙ ค่าแรงต่อวัน & ภาษี <span id="settingsChevron">▾</span></button>
+      <div class="settings-body" id="settingsBody">
+        <div class="settings-row">
+          <div class="field-group">
+            <div class="field-label">ค่าแรงต่อวัน (บาท)</div>
+            <input type="number" id="dailyWage" placeholder="เช่น 800" min="0">
+          </div>
+          <div class="field-group">
+            <div class="field-label">ภาษีหัก ณ ที่จ่าย (%)</div>
+            <input type="number" id="taxRate" placeholder="เช่น 3" min="0" max="100" step="0.1">
+          </div>
+          <button class="btn btn-ghost btn-sm" id="saveProfileBtn" style="margin-bottom:1px">บันทึก</button>
+        </div>
+        <div style="margin-top:8px;font-size:.75rem;color:var(--overlay1)" id="profileStatus"></div>
+        <hr class="divider">
+      </div>
+      <div class="mode-tabs">
+        <button class="mode-tab active" data-mode="manual">กรอกเอง</button>
+        <button class="mode-tab" data-mode="calc">คำนวณจากวันทำงาน</button>
+      </div>
+      <div id="modeManual" class="add-form">
+        <div class="add-row">
+          <input type="text" id="incomeNameManual" placeholder="ชื่อรายการรายได้" style="flex:2">
+          <input type="number" id="incomeAmountManual" placeholder="จำนวน (บาท)" style="flex:1">
+        </div>
+        <button class="btn btn-green btn-sm" id="addIncomeManualBtn">+ เพิ่มรายได้</button>
+      </div>
+      <div id="modeCalc" class="add-form" style="display:none">
+        <div class="add-row">
+          <input type="text" id="incomeNameCalc" placeholder="ชื่อรายการ" style="flex:2">
+          <input type="number" id="workDays" placeholder="จำนวนวัน" style="flex:1" min="0">
+        </div>
+        <div class="preview-box" id="calcPreview"></div>
+        <button class="btn btn-green btn-sm" id="addIncomeCalcBtn">+ เพิ่มรายได้</button>
+      </div>
+      <hr class="divider">
+      <div class="item-list" id="incomeList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title-row">
+        <div class="card-title"><span class="dot" style="background:var(--maroon)"></span>รายจ่ายเดือนนี้</div>
+        <button class="btn btn-copy btn-sm" id="copyExpenseBtn">📋 คัดลอกรายจ่าย</button>
+      </div>
+      <div class="add-form">
+        <div class="add-row">
+          <input type="text" id="expenseName" placeholder="ชื่อรายการ" style="flex:2">
+          <input type="number" id="expenseAmount" placeholder="จำนวน (บาท)" style="flex:1">
+        </div>
+        <div class="add-row" style="align-items:center">
+          <div class="field-group">
+            <div class="field-label">วันที่กำหนดจ่าย (ไม่บังคับ)</div>
+            <input type="number" id="expenseDueDay" placeholder="วันที่ 1-31" min="1" max="31">
+          </div>
+          <button class="btn btn-primary btn-sm" id="addExpenseBtn" style="margin-top:16px">+ เพิ่มรายจ่าย</button>
+        </div>
+      </div>
+      <hr class="divider">
+      <div class="item-list" id="expenseList"></div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="pasteModal">
   <div class="modal">
     <div class="modal-title" id="pasteModalTitle">วางรายการไปยังเดือน</div>
@@ -269,53 +325,33 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ── Config ──
-const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwWIS2KFK9ETJGnzeXCsf8e50ImvJP0zMa9ZQItt1Hue8EWRRq08ggmsP69TBvv2QJWAA/exec';
+const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbztB8Vjp6wEL-KnEtC7o93lVVJj8GqHqa9UhBd-e-e0sPv7kn-K4C17jNV3hGLBmOjAnw/exec';
+const SESSION_KEY = 'mp_session';
 
-// ── State ──
 const MONTHS_TH = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
                    'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 let currentYear = new Date().getFullYear();
 let currentMonth = new Date().getMonth();
-let plans = {};
-let profile = { dailyWage: 0, taxRate: 0 };
-let incomeMode = 'manual';
-let clipboard = null;
-let pasteTargetYear = currentYear;
-let pasteTargetMonth = currentMonth;
+let plans = {}, profile = { dailyWage: 0, taxRate: 0 };
+let incomeMode = 'manual', clipboard = null;
+let pasteTargetYear = currentYear, pasteTargetMonth = currentMonth;
 let saveTimer = null;
 
 function monthKey(y, m) { return MONTHS_TH[m]; }
 function currentKey() { return monthKey(currentYear, currentMonth); }
-function prevKey() {
-  let m = currentMonth - 1, y = currentYear;
-  if (m < 0) { m = 11; y--; }
-  return monthKey(y, m);
-}
-function getMonthData(key) {
-  if (!plans[key]) plans[key] = { incomes: [], expenses: [] };
-  return plans[key];
-}
-function fmt(n) { return '฿' + Number(n||0).toLocaleString('th-TH', {minimumFractionDigits:0,maximumFractionDigits:2}); }
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function prevKey() { let m=currentMonth-1,y=currentYear; if(m<0){m=11;y--;} return monthKey(y,m); }
+function getMonthData(k) { if(!plans[k])plans[k]={incomes:[],expenses:[]}; return plans[k]; }
+function fmt(n) { return '฿'+Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:0,maximumFractionDigits:2}); }
+function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 // ── Toast ──
-function showToast(msg, dur=2000) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), dur);
-}
+function showToast(msg,dur=2000){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
 
-// ── Sync status ──
-function setSyncStatus(state, label) {
-  const dot = document.getElementById('syncDot');
-  const lbl = document.getElementById('syncLabel');
-  dot.className = 'sync-dot ' + state;
-  lbl.textContent = label;
-}
+// ── Sync ──
+function setSyncStatus(state,label){document.getElementById('syncDot').className='sync-dot '+state;document.getElementById('syncLabel').textContent=label;}
 
-// ── Apps Script API ──
+// ── API ──
 async function writeSheet(sheetName, rows) {
   const res = await fetch(WEBAPP_URL, {
     method: 'POST',
@@ -325,226 +361,245 @@ async function writeSheet(sheetName, rows) {
   const data = await res.json();
   if (!data.ok) throw new Error('write failed');
 }
-
 async function readSheet(sheetName) {
   try {
-    const url = `${WEBAPP_URL}?sheet=${encodeURIComponent(sheetName)}`;
-    const res = await fetch(url);
+    const res = await fetch(`${WEBAPP_URL}?sheet=${encodeURIComponent(sheetName)}`);
     const data = await res.json();
     return data.values || [];
   } catch { return null; }
 }
 
-// ── Save / Load ──
+// ── PIN ──
+let pinInput = '';
+const PIN_LENGTH = 6;
+
+function buildNumpad() {
+  const pad = document.getElementById('pinNumpad');
+  const keys = ['1','2','3','4','5','6','7','8','9','','0','⌫'];
+  pad.innerHTML = keys.map(k => {
+    if (k === '') return `<button class="pin-key empty" disabled></button>`;
+    if (k === '⌫') return `<button class="pin-key del" data-key="del">⌫</button>`;
+    return `<button class="pin-key" data-key="${k}">${k}</button>`;
+  }).join('');
+  pad.querySelectorAll('.pin-key[data-key]').forEach(btn => {
+    btn.addEventListener('click', () => handlePinKey(btn.dataset.key));
+  });
+}
+
+function updatePinDots() {
+  document.querySelectorAll('.pin-dot').forEach((d,i) => {
+    d.classList.toggle('filled', i < pinInput.length);
+  });
+}
+
+async function handlePinKey(key) {
+  if (key === 'del') {
+    pinInput = pinInput.slice(0, -1);
+    updatePinDots();
+    document.getElementById('pinError').textContent = '';
+    return;
+  }
+  if (pinInput.length >= PIN_LENGTH) return;
+  pinInput += key;
+  updatePinDots();
+  if (pinInput.length === PIN_LENGTH) {
+    await verifyPin(pinInput);
+  }
+}
+
+async function verifyPin(pin) {
+  const loading = document.getElementById('pinLoading');
+  const errEl = document.getElementById('pinError');
+  loading.textContent = 'กำลังตรวจสอบ...';
+  errEl.textContent = '';
+  try {
+    const res = await fetch(`${WEBAPP_URL}?action=checkpin&pin=${encodeURIComponent(pin)}`);
+    const data = await res.json();
+    loading.textContent = '';
+    if (data.ok) {
+      sessionStorage.setItem(SESSION_KEY, '1');
+      showMainApp();
+    } else {
+      pinInput = '';
+      updatePinDots();
+      errEl.textContent = '❌ PIN ไม่ถูกต้อง';
+      setTimeout(() => { errEl.textContent = ''; }, 2000);
+    }
+  } catch {
+    loading.textContent = '';
+    pinInput = '';
+    updatePinDots();
+    errEl.textContent = '⚠️ เชื่อมต่อไม่ได้ ลองใหม่';
+  }
+}
+
+function showMainApp() {
+  document.getElementById('pinScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+  initApp();
+}
+
+function lockApp() {
+  sessionStorage.removeItem(SESSION_KEY);
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('pinScreen').style.display = 'flex';
+  pinInput = '';
+  updatePinDots();
+  document.getElementById('pinError').textContent = '';
+}
+
+document.getElementById('logoutBtn').onclick = lockApp;
+
+// ── Save/Load ──
 async function saveMonthToSheets(key) {
-  setSyncStatus('busy', 'กำลังบันทึก...');
+  setSyncStatus('busy','กำลังบันทึก...');
   try {
     const d = getMonthData(key);
     const rows = [['type','id','name','amount','done','dueDay']];
-    for (const x of d.incomes) rows.push(['income', x.id, x.name, x.amount, x.done?'1':'0', '']);
-    for (const x of d.expenses) rows.push(['expense', x.id, x.name, x.amount, x.done?'1':'0', x.dueDay||'']);
+    for (const x of d.incomes) rows.push(['income',x.id,x.name,x.amount,x.done?'1':'0','']);
+    for (const x of d.expenses) rows.push(['expense',x.id,x.name,x.amount,x.done?'1':'0',x.dueDay||'']);
     await writeSheet(key, rows);
-    setSyncStatus('ok', 'บันทึกแล้ว');
-  } catch(e) {
-    setSyncStatus('err', 'บันทึกไม่สำเร็จ');
-    showToast('❌ บันทึกไม่สำเร็จ ตรวจสอบการเชื่อมต่อ');
+    setSyncStatus('ok','บันทึกแล้ว');
+  } catch {
+    setSyncStatus('err','บันทึกไม่สำเร็จ');
+    showToast('❌ บันทึกไม่สำเร็จ');
   }
 }
-
 async function saveProfileToSheets() {
-  try {
-    await writeSheet('ตั้งค่า', [['dailyWage','taxRate'], [profile.dailyWage, profile.taxRate]]);
-  } catch {}
+  try { await writeSheet('ตั้งค่า',[['dailyWage','taxRate','pin'],[(profile.dailyWage||0),(profile.taxRate||0),'']]);} catch{}
 }
-
 async function loadMonthFromSheets(key) {
   const rows = await readSheet(key);
-  if (!rows || rows.length < 2) { plans[key] = { incomes: [], expenses: [] }; return; }
-  const incomes = [], expenses = [];
-  for (let i = 1; i < rows.length; i++) {
-    const [type, id, name, amount, done, dueDay] = rows[i];
-    if (!type) continue;
-    const item = { id: id||uid(), name: name||'', amount: +amount||0, done: done==='1' };
-    if (type === 'income') incomes.push(item);
-    else if (type === 'expense') expenses.push({ ...item, dueDay: dueDay ? +dueDay : null });
+  if (!rows||rows.length<2){plans[key]={incomes:[],expenses:[]};return;}
+  const incomes=[],expenses=[];
+  for(let i=1;i<rows.length;i++){
+    const [type,id,name,amount,done,dueDay]=rows[i];
+    if(!type)continue;
+    const item={id:id||uid(),name:name||'',amount:+amount||0,done:done==='1'};
+    if(type==='income')incomes.push(item);
+    else if(type==='expense')expenses.push({...item,dueDay:dueDay?+dueDay:null});
   }
-  plans[key] = { incomes, expenses };
+  plans[key]={incomes,expenses};
 }
-
 async function loadProfileFromSheets() {
   const rows = await readSheet('ตั้งค่า');
-  if (rows && rows.length >= 2) {
-    profile.dailyWage = +rows[1][0] || 0;
-    profile.taxRate = +rows[1][1] || 0;
-  }
+  if(rows&&rows.length>=2){profile.dailyWage=+rows[1][0]||0;profile.taxRate=+rows[1][1]||0;}
 }
-
-// debounce save
-function scheduleSave(key) {
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => saveMonthToSheets(key), 800);
-}
+function scheduleSave(key){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveMonthToSheets(key),800);}
 
 // ── Summary ──
-function updateSummary() {
-  const d = getMonthData(currentKey());
-  const totalIncome = d.incomes.reduce((s,x)=>s+(+x.amount||0),0);
-  const receivedIncome = d.incomes.filter(x=>x.done).reduce((s,x)=>s+(+x.amount||0),0);
-  const totalExpense = d.expenses.reduce((s,x)=>s+(+x.amount||0),0);
-  const paidExpense = d.expenses.filter(x=>x.done).reduce((s,x)=>s+(+x.amount||0),0);
-  const pendingExpense = totalExpense - paidExpense;
-  const balance = totalIncome - totalExpense;
-  document.getElementById('sumIncome').textContent = fmt(totalIncome);
-  document.getElementById('sumIncomeReceived').textContent = 'ได้รับแล้ว ' + fmt(receivedIncome);
-  document.getElementById('sumExpense').textContent = fmt(totalExpense);
-  document.getElementById('sumExpensePaid').textContent = 'จ่ายแล้ว ' + fmt(paidExpense);
-  const bv = document.getElementById('balanceValue');
-  const bb = document.getElementById('balanceBadge');
-  bv.textContent = fmt(balance);
-  if (pendingExpense <= 0 && totalExpense > 0) {
-    bv.style.color='var(--green)'; bb.className='badge badge-ok'; bb.textContent='✓ จ่ายครบแล้ว';
-  } else if (pendingExpense > 0) {
-    bv.style.color = balance >= 0 ? 'var(--yellow)' : 'var(--red)';
-    bb.className='badge badge-warn'; bb.textContent=`ค้างจ่าย ${fmt(pendingExpense)}`;
-  } else {
-    bv.style.color='var(--subtext1)'; bb.className='badge'; bb.textContent='—';
-  }
-  const pk=prevKey(), pd=plans[pk];
-  const isEmpty = d.incomes.length===0 && d.expenses.length===0;
-  const hasPrev = pd && (pd.incomes.length>0 || pd.expenses.length>0);
-  document.getElementById('copyBanner').style.display = (isEmpty&&hasPrev)?'block':'none';
+function updateSummary(){
+  const d=getMonthData(currentKey());
+  const ti=d.incomes.reduce((s,x)=>s+(+x.amount||0),0);
+  const ri=d.incomes.filter(x=>x.done).reduce((s,x)=>s+(+x.amount||0),0);
+  const te=d.expenses.reduce((s,x)=>s+(+x.amount||0),0);
+  const pe=d.expenses.filter(x=>x.done).reduce((s,x)=>s+(+x.amount||0),0);
+  const bal=ti-te;
+  document.getElementById('sumIncome').textContent=fmt(ti);
+  document.getElementById('sumIncomeReceived').textContent='ได้รับแล้ว '+fmt(ri);
+  document.getElementById('sumExpense').textContent=fmt(te);
+  document.getElementById('sumExpensePaid').textContent='จ่ายแล้ว '+fmt(pe);
+  const bv=document.getElementById('balanceValue'),bb=document.getElementById('balanceBadge');
+  bv.textContent=fmt(bal);
+  if(te-pe<=0&&te>0){bv.style.color='var(--green)';bb.className='badge badge-ok';bb.textContent='✓ จ่ายครบแล้ว';}
+  else if(te-pe>0){bv.style.color=bal>=0?'var(--yellow)':'var(--red)';bb.className='badge badge-warn';bb.textContent=`ค้างจ่าย ${fmt(te-pe)}`;}
+  else{bv.style.color='var(--subtext1)';bb.className='badge';bb.textContent='—';}
+  const pk=prevKey(),pd=plans[pk];
+  const isEmpty=d.incomes.length===0&&d.expenses.length===0;
+  const hasPrev=pd&&(pd.incomes.length>0||pd.expenses.length>0);
+  document.getElementById('copyBanner').style.display=(isEmpty&&hasPrev)?'block':'none';
 }
 
 // ── Render ──
-const chkSVG = c => `<svg width="10" height="8" viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-
-function renderIncomes() {
-  const d = getMonthData(currentKey());
-  const list = document.getElementById('incomeList');
-  if (!d.incomes.length) { list.innerHTML='<div class="empty-state">ยังไม่มีรายการรายได้</div>'; return; }
-  list.innerHTML = d.incomes.map((x,i)=>`
-    <div class="item ${x.done?'done':''}">
-      <button class="item-check ${x.done?'checked-green':''}" data-action="check" data-type="income" data-i="${i}">${chkSVG('var(--green)')}</button>
-      <span class="item-name">${escHtml(x.name)}</span>
-      <span class="item-amount" style="color:var(--green)">${fmt(x.amount)}</span>
-      <div class="item-actions">
-        <button class="item-btn edit" data-action="edit" data-type="income" data-i="${i}">✎</button>
-        <button class="item-btn delete" data-action="delete" data-type="income" data-i="${i}">✕</button>
-      </div>
-    </div>`).join('');
+const chk=c=>`<svg width="10" height="8" viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+function renderIncomes(){
+  const d=getMonthData(currentKey()),list=document.getElementById('incomeList');
+  if(!d.incomes.length){list.innerHTML='<div class="empty-state">ยังไม่มีรายการรายได้</div>';return;}
+  list.innerHTML=d.incomes.map((x,i)=>`<div class="item ${x.done?'done':''}">
+    <button class="item-check ${x.done?'checked-green':''}" data-action="check" data-type="income" data-i="${i}">${chk('var(--green)')}</button>
+    <span class="item-name">${escHtml(x.name)}</span>
+    <span class="item-amount" style="color:var(--green)">${fmt(x.amount)}</span>
+    <div class="item-actions">
+      <button class="item-btn edit" data-action="edit" data-type="income" data-i="${i}">✎</button>
+      <button class="item-btn delete" data-action="delete" data-type="income" data-i="${i}">✕</button>
+    </div></div>`).join('');
 }
-
-function renderExpenses() {
-  const d = getMonthData(currentKey());
-  const sorted = [...d.expenses].map((x,i)=>({...x,_i:i})).sort((a,b)=>{
-    if (!a.dueDay&&!b.dueDay) return 0;
-    if (!a.dueDay) return 1; if (!b.dueDay) return -1;
-    return (+a.dueDay)-(+b.dueDay);
+function renderExpenses(){
+  const d=getMonthData(currentKey());
+  const sorted=[...d.expenses].map((x,i)=>({...x,_i:i})).sort((a,b)=>{
+    if(!a.dueDay&&!b.dueDay)return 0;if(!a.dueDay)return 1;if(!b.dueDay)return -1;return(+a.dueDay)-(+b.dueDay);
   });
-  const list = document.getElementById('expenseList');
-  if (!sorted.length) { list.innerHTML='<div class="empty-state">ยังไม่มีรายการรายจ่าย</div>'; return; }
-  list.innerHTML = sorted.map(x=>`
-    <div class="item ${x.done?'done':''}">
-      <button class="item-check ${x.done?'checked-mauve':''}" data-action="check" data-type="expense" data-i="${x._i}">${chkSVG('var(--mauve)')}</button>
-      ${x.dueDay?`<span class="item-due">วัน ${x.dueDay}</span>`:''}
-      <span class="item-name">${escHtml(x.name)}</span>
-      <span class="item-amount" style="color:var(--maroon)">${fmt(x.amount)}</span>
-      <div class="item-actions">
-        <button class="item-btn edit" data-action="edit" data-type="expense" data-i="${x._i}">✎</button>
-        <button class="item-btn delete" data-action="delete" data-type="expense" data-i="${x._i}">✕</button>
-      </div>
-    </div>`).join('');
+  const list=document.getElementById('expenseList');
+  if(!sorted.length){list.innerHTML='<div class="empty-state">ยังไม่มีรายการรายจ่าย</div>';return;}
+  list.innerHTML=sorted.map(x=>`<div class="item ${x.done?'done':''}">
+    <button class="item-check ${x.done?'checked-mauve':''}" data-action="check" data-type="expense" data-i="${x._i}">${chk('var(--mauve)')}</button>
+    ${x.dueDay?`<span class="item-due">วัน ${x.dueDay}</span>`:''}
+    <span class="item-name">${escHtml(x.name)}</span>
+    <span class="item-amount" style="color:var(--maroon)">${fmt(x.amount)}</span>
+    <div class="item-actions">
+      <button class="item-btn edit" data-action="edit" data-type="expense" data-i="${x._i}">✎</button>
+      <button class="item-btn delete" data-action="delete" data-type="expense" data-i="${x._i}">✕</button>
+    </div></div>`).join('');
 }
-
-function renderAll() {
-  document.getElementById('monthLabel').textContent = `${MONTHS_TH[currentMonth]} ${currentYear+543}`;
-  updateSummary(); renderIncomes(); renderExpenses(); updateProfileUI();
+function renderAll(){
+  document.getElementById('monthLabel').textContent=`${MONTHS_TH[currentMonth]} ${currentYear+543}`;
+  updateSummary();renderIncomes();renderExpenses();updateProfileUI();
 }
-
-function updateProfileUI() {
-  document.getElementById('dailyWage').value = profile.dailyWage||'';
-  document.getElementById('taxRate').value = profile.taxRate||'';
-  if (profile.dailyWage) document.getElementById('profileStatus').textContent =
-    `ค่าแรงต่อวัน: ${fmt(profile.dailyWage)} | ภาษี: ${profile.taxRate||0}%`;
+function updateProfileUI(){
+  document.getElementById('dailyWage').value=profile.dailyWage||'';
+  document.getElementById('taxRate').value=profile.taxRate||'';
+  if(profile.dailyWage)document.getElementById('profileStatus').textContent=`ค่าแรงต่อวัน: ${fmt(profile.dailyWage)} | ภาษี: ${profile.taxRate||0}%`;
 }
 
 // ── Inline edit ──
-function openEdit(type, idx) {
-  const d = getMonthData(currentKey());
-  const arr = type==='income' ? d.incomes : d.expenses;
-  const x = arr[idx];
-  const listEl = document.getElementById(type==='income'?'incomeList':'expenseList');
-  let targetEl = null;
-  listEl.querySelectorAll('.item').forEach(el => {
-    if (el.querySelector(`[data-action="edit"][data-i="${idx}"]`)) targetEl = el;
-  });
-  if (!targetEl) return;
-  const nameSpan = targetEl.querySelector('.item-name');
-  const amountSpan = targetEl.querySelector('.item-amount');
-  const actions = targetEl.querySelector('.item-actions');
-  const dueSpan = targetEl.querySelector('.item-due');
-  const nameInput = Object.assign(document.createElement('input'), {type:'text',value:x.name,style:'flex:2'});
-  const amountInput = Object.assign(document.createElement('input'), {type:'number',value:x.amount,style:'flex:1;min-width:80px'});
-  let dueInput = null;
-  if (type==='expense') {
-    dueInput = Object.assign(document.createElement('input'), {type:'number',value:x.dueDay||'',placeholder:'วัน',style:'width:52px;flex-shrink:0'});
-    if (dueSpan) dueSpan.replaceWith(dueInput); else targetEl.insertBefore(dueInput, nameSpan);
-  }
-  nameSpan.replaceWith(nameInput); amountSpan.replaceWith(amountInput); nameInput.focus(); nameInput.select();
-  const saveBtn = Object.assign(document.createElement('button'), {className:'item-btn',textContent:'✓',style:'color:var(--green)'});
-  const cancelBtn = Object.assign(document.createElement('button'), {className:'item-btn',textContent:'✕',style:'color:var(--overlay0)'});
-  actions.innerHTML=''; actions.appendChild(saveBtn); actions.appendChild(cancelBtn);
-  async function doSave() {
-    const n=nameInput.value.trim(), a=+amountInput.value;
-    if (!n||!a) return;
-    arr[idx].name=n; arr[idx].amount=a;
-    if (type==='expense'&&dueInput) arr[idx].dueDay=dueInput.value?+dueInput.value:null;
-    renderAll(); scheduleSave(currentKey());
-  }
-  saveBtn.onclick=doSave; cancelBtn.onclick=()=>renderAll();
-  [nameInput,amountInput].forEach(inp=>inp.addEventListener('keydown',e=>{if(e.key==='Enter')doSave();if(e.key==='Escape')renderAll();}));
+function openEdit(type,idx){
+  const d=getMonthData(currentKey()),arr=type==='income'?d.incomes:d.expenses,x=arr[idx];
+  const listEl=document.getElementById(type==='income'?'incomeList':'expenseList');
+  let targetEl=null;
+  listEl.querySelectorAll('.item').forEach(el=>{if(el.querySelector(`[data-action="edit"][data-i="${idx}"]`))targetEl=el;});
+  if(!targetEl)return;
+  const nameSpan=targetEl.querySelector('.item-name'),amountSpan=targetEl.querySelector('.item-amount');
+  const actions=targetEl.querySelector('.item-actions'),dueSpan=targetEl.querySelector('.item-due');
+  const ni=Object.assign(document.createElement('input'),{type:'text',value:x.name,style:'flex:2'});
+  const ai=Object.assign(document.createElement('input'),{type:'number',value:x.amount,style:'flex:1;min-width:80px'});
+  let di=null;
+  if(type==='expense'){di=Object.assign(document.createElement('input'),{type:'number',value:x.dueDay||'',placeholder:'วัน',style:'width:52px;flex-shrink:0'});if(dueSpan)dueSpan.replaceWith(di);else targetEl.insertBefore(di,nameSpan);}
+  nameSpan.replaceWith(ni);amountSpan.replaceWith(ai);ni.focus();ni.select();
+  const sb=Object.assign(document.createElement('button'),{className:'item-btn',textContent:'✓',style:'color:var(--green)'});
+  const cb=Object.assign(document.createElement('button'),{className:'item-btn',textContent:'✕',style:'color:var(--overlay0)'});
+  actions.innerHTML='';actions.appendChild(sb);actions.appendChild(cb);
+  async function doSave(){const n=ni.value.trim(),a=+ai.value;if(!n||!a)return;arr[idx].name=n;arr[idx].amount=a;if(type==='expense'&&di)arr[idx].dueDay=di.value?+di.value:null;renderAll();scheduleSave(currentKey());}
+  sb.onclick=doSave;cb.onclick=()=>renderAll();
+  [ni,ai].forEach(inp=>inp.addEventListener('keydown',e=>{if(e.key==='Enter')doSave();if(e.key==='Escape')renderAll();}));
 }
 
-// ── Item click handler ──
-function handleItemClick(e) {
-  const btn = e.target.closest('[data-action]');
-  if (!btn) return;
-  const {action,type,i:iStr} = btn.dataset; const i=+iStr;
-  const d = getMonthData(currentKey());
-  if (action==='check') {
-    if (type==='income') d.incomes[i].done=!d.incomes[i].done;
-    else d.expenses[i].done=!d.expenses[i].done;
-    renderAll(); scheduleSave(currentKey());
-  } else if (action==='delete') {
-    if (type==='income') d.incomes.splice(i,1);
-    else d.expenses.splice(i,1);
-    renderAll(); scheduleSave(currentKey());
-  } else if (action==='edit') {
-    openEdit(type,i);
-  }
+// ── Item events ──
+function handleItemClick(e){
+  const btn=e.target.closest('[data-action]');if(!btn)return;
+  const {action,type,i:iStr}=btn.dataset,i=+iStr,d=getMonthData(currentKey());
+  if(action==='check'){if(type==='income')d.incomes[i].done=!d.incomes[i].done;else d.expenses[i].done=!d.expenses[i].done;renderAll();scheduleSave(currentKey());}
+  else if(action==='delete'){if(type==='income')d.incomes.splice(i,1);else d.expenses.splice(i,1);renderAll();scheduleSave(currentKey());}
+  else if(action==='edit')openEdit(type,i);
 }
-document.getElementById('incomeList').addEventListener('click', handleItemClick);
-document.getElementById('expenseList').addEventListener('click', handleItemClick);
+document.getElementById('incomeList').addEventListener('click',handleItemClick);
+document.getElementById('expenseList').addEventListener('click',handleItemClick);
 
 // ── Month nav ──
-async function goMonth(dy) {
+async function goMonth(dy){
   currentMonth+=dy;
-  if (currentMonth<0){currentMonth=11;currentYear--;}
-  if (currentMonth>11){currentMonth=0;currentYear++;}
+  if(currentMonth<0){currentMonth=11;currentYear--;}
+  if(currentMonth>11){currentMonth=0;currentYear++;}
   setSyncStatus('busy','กำลังโหลด...');
   await loadMonthFromSheets(currentKey());
   setSyncStatus('ok','โหลดแล้ว');
   renderAll();
 }
-document.getElementById('prevMonthBtn').onclick = ()=>goMonth(-1);
-document.getElementById('nextMonthBtn').onclick = ()=>goMonth(1);
+document.getElementById('prevMonthBtn').onclick=()=>goMonth(-1);
+document.getElementById('nextMonthBtn').onclick=()=>goMonth(1);
 
 // ── Settings ──
-document.getElementById('settingsToggle').onclick = () => {
-  const b=document.getElementById('settingsBody'), c=document.getElementById('settingsChevron');
-  b.classList.toggle('open'); c.textContent=b.classList.contains('open')?'▴':'▾';
-};
-document.getElementById('saveProfileBtn').onclick = async () => {
+document.getElementById('settingsToggle').onclick=()=>{const b=document.getElementById('settingsBody'),c=document.getElementById('settingsChevron');b.classList.toggle('open');c.textContent=b.classList.contains('open')?'▴':'▾';};
+document.getElementById('saveProfileBtn').onclick=async()=>{
   profile.dailyWage=+document.getElementById('dailyWage').value||0;
   profile.taxRate=+document.getElementById('taxRate').value||0;
   await saveProfileToSheets();
@@ -553,129 +608,43 @@ document.getElementById('saveProfileBtn').onclick = async () => {
 };
 
 // ── Mode tabs ──
-document.querySelectorAll('.mode-tab').forEach(btn=>{
-  btn.onclick=()=>{
-    document.querySelectorAll('.mode-tab').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active'); incomeMode=btn.dataset.mode;
-    document.getElementById('modeManual').style.display=incomeMode==='manual'?'flex':'none';
-    document.getElementById('modeCalc').style.display=incomeMode==='calc'?'flex':'none';
-  };
-});
+document.querySelectorAll('.mode-tab').forEach(btn=>{btn.onclick=()=>{document.querySelectorAll('.mode-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');incomeMode=btn.dataset.mode;document.getElementById('modeManual').style.display=incomeMode==='manual'?'flex':'none';document.getElementById('modeCalc').style.display=incomeMode==='calc'?'flex':'none';};});
 document.getElementById('modeManual').style.display='flex';
+document.getElementById('workDays').oninput=()=>{const days=+document.getElementById('workDays').value||0,box=document.getElementById('calcPreview');if(!days||!profile.dailyWage){box.classList.remove('show');return;}const gross=days*profile.dailyWage,tax=gross*(profile.taxRate/100),net=gross-tax;box.classList.add('show');box.textContent=`${days} วัน × ${fmt(profile.dailyWage)} − ภาษี ${profile.taxRate||0}% (${fmt(tax)}) = ${fmt(net)}`;};
 
-// ── Calc preview ──
-document.getElementById('workDays').oninput = () => {
-  const days=+document.getElementById('workDays').value||0, box=document.getElementById('calcPreview');
-  if (!days||!profile.dailyWage){box.classList.remove('show');return;}
-  const gross=days*profile.dailyWage, tax=gross*(profile.taxRate/100), net=gross-tax;
-  box.classList.add('show');
-  box.textContent=`${days} วัน × ${fmt(profile.dailyWage)} − ภาษี ${profile.taxRate||0}% (${fmt(tax)}) = ${fmt(net)}`;
-};
-
-// ── Add income (manual) ──
-document.getElementById('addIncomeManualBtn').onclick = async () => {
-  const name=document.getElementById('incomeNameManual').value.trim();
-  const amount=+document.getElementById('incomeAmountManual').value;
-  if (!name||!amount) return;
-  getMonthData(currentKey()).incomes.push({id:uid(),name,amount,done:false});
-  document.getElementById('incomeNameManual').value='';
-  document.getElementById('incomeAmountManual').value='';
-  renderAll(); scheduleSave(currentKey());
-};
-
-// ── Add income (calc) ──
-document.getElementById('addIncomeCalcBtn').onclick = async () => {
-  const name=document.getElementById('incomeNameCalc').value.trim();
-  const days=+document.getElementById('workDays').value||0;
-  if (!name||!days||!profile.dailyWage){
-    if(!profile.dailyWage){document.getElementById('settingsBody').classList.add('open');document.getElementById('settingsChevron').textContent='▴';}
-    return;
-  }
-  const gross=days*profile.dailyWage, net=gross-gross*(profile.taxRate/100);
-  getMonthData(currentKey()).incomes.push({id:uid(),name,amount:net,done:false});
-  document.getElementById('incomeNameCalc').value='';
-  document.getElementById('workDays').value='';
-  document.getElementById('calcPreview').classList.remove('show');
-  renderAll(); scheduleSave(currentKey());
-};
-
-// ── Add expense ──
-document.getElementById('addExpenseBtn').onclick = async () => {
-  const name=document.getElementById('expenseName').value.trim();
-  const amount=+document.getElementById('expenseAmount').value;
-  const dueDay=document.getElementById('expenseDueDay').value;
-  if (!name||!amount) return;
-  getMonthData(currentKey()).expenses.push({id:uid(),name,amount,dueDay:dueDay?+dueDay:null,done:false});
-  document.getElementById('expenseName').value='';
-  document.getElementById('expenseAmount').value='';
-  document.getElementById('expenseDueDay').value='';
-  renderAll(); scheduleSave(currentKey());
-};
-
-// ── Copy from prev ──
-document.getElementById('copyFromPrevBtn').onclick = async () => {
-  const pk=prevKey(), pd=plans[pk]; if (!pd) return;
-  const cur=getMonthData(currentKey());
-  cur.incomes=pd.incomes.map(x=>({...x,id:uid(),done:false}));
-  cur.expenses=pd.expenses.map(x=>({...x,id:uid(),done:false}));
-  renderAll(); scheduleSave(currentKey());
-};
+// ── Add items ──
+document.getElementById('addIncomeManualBtn').onclick=async()=>{const n=document.getElementById('incomeNameManual').value.trim(),a=+document.getElementById('incomeAmountManual').value;if(!n||!a)return;getMonthData(currentKey()).incomes.push({id:uid(),name:n,amount:a,done:false});document.getElementById('incomeNameManual').value='';document.getElementById('incomeAmountManual').value='';renderAll();scheduleSave(currentKey());};
+document.getElementById('addIncomeCalcBtn').onclick=async()=>{const n=document.getElementById('incomeNameCalc').value.trim(),days=+document.getElementById('workDays').value||0;if(!n||!days||!profile.dailyWage){if(!profile.dailyWage){document.getElementById('settingsBody').classList.add('open');document.getElementById('settingsChevron').textContent='▴';}return;}const gross=days*profile.dailyWage,net=gross-gross*(profile.taxRate/100);getMonthData(currentKey()).incomes.push({id:uid(),name:n,amount:net,done:false});document.getElementById('incomeNameCalc').value='';document.getElementById('workDays').value='';document.getElementById('calcPreview').classList.remove('show');renderAll();scheduleSave(currentKey());};
+document.getElementById('addExpenseBtn').onclick=async()=>{const n=document.getElementById('expenseName').value.trim(),a=+document.getElementById('expenseAmount').value,dd=document.getElementById('expenseDueDay').value;if(!n||!a)return;getMonthData(currentKey()).expenses.push({id:uid(),name:n,amount:a,dueDay:dd?+dd:null,done:false});document.getElementById('expenseName').value='';document.getElementById('expenseAmount').value='';document.getElementById('expenseDueDay').value='';renderAll();scheduleSave(currentKey());};
+document.getElementById('copyFromPrevBtn').onclick=async()=>{const pk=prevKey(),pd=plans[pk];if(!pd)return;const cur=getMonthData(currentKey());cur.incomes=pd.incomes.map(x=>({...x,id:uid(),done:false}));cur.expenses=pd.expenses.map(x=>({...x,id:uid(),done:false}));renderAll();scheduleSave(currentKey());};
 
 // ── Paste modal ──
-function openPasteModal(type) {
-  const d=getMonthData(currentKey());
-  const items=type==='income'?d.incomes:d.expenses;
-  const label=type==='income'?'รายได้':'รายจ่าย';
-  if (!items.length){showToast(`ไม่มี${label}ในเดือนนี้`);return;}
-  clipboard={type,items:JSON.parse(JSON.stringify(items)),label};
-  let ty=currentYear,tm=currentMonth+1;
-  if(tm>11){tm=0;ty++;}
-  pasteTargetYear=ty; pasteTargetMonth=tm;
-  document.getElementById('pasteModalTitle').textContent=`วาง${label}ไปยังเดือน`;
-  document.getElementById('pasteModalDesc').textContent=`${items.length} รายการจาก ${MONTHS_TH[currentMonth]} ${currentYear+543}`;
-  renderPasteGrid();
-  document.getElementById('pasteModal').classList.add('open');
-}
-function renderPasteGrid() {
-  document.getElementById('pasteYearLabel').textContent=`${pasteTargetYear+543}`;
-  const grid=document.getElementById('pasteMonthGrid');
-  grid.innerHTML=MONTHS_TH.map((m,i)=>`<button class="month-opt ${i===pasteTargetMonth?'selected':''}" data-m="${i}">${m.slice(0,3)}</button>`).join('');
-  grid.querySelectorAll('.month-opt').forEach(btn=>{btn.onclick=()=>{pasteTargetMonth=+btn.dataset.m;renderPasteGrid();};});
-}
+function openPasteModal(type){const d=getMonthData(currentKey()),items=type==='income'?d.incomes:d.expenses,label=type==='income'?'รายได้':'รายจ่าย';if(!items.length){showToast(`ไม่มี${label}ในเดือนนี้`);return;}clipboard={type,items:JSON.parse(JSON.stringify(items)),label};let ty=currentYear,tm=currentMonth+1;if(tm>11){tm=0;ty++;}pasteTargetYear=ty;pasteTargetMonth=tm;document.getElementById('pasteModalTitle').textContent=`วาง${label}ไปยังเดือน`;document.getElementById('pasteModalDesc').textContent=`${items.length} รายการจาก ${MONTHS_TH[currentMonth]} ${currentYear+543}`;renderPasteGrid();document.getElementById('pasteModal').classList.add('open');}
+function renderPasteGrid(){document.getElementById('pasteYearLabel').textContent=`${pasteTargetYear+543}`;const grid=document.getElementById('pasteMonthGrid');grid.innerHTML=MONTHS_TH.map((m,i)=>`<button class="month-opt ${i===pasteTargetMonth?'selected':''}" data-m="${i}">${m.slice(0,3)}</button>`).join('');grid.querySelectorAll('.month-opt').forEach(btn=>{btn.onclick=()=>{pasteTargetMonth=+btn.dataset.m;renderPasteGrid();};});}
 function closePasteModal(){document.getElementById('pasteModal').classList.remove('open');clipboard=null;}
 document.getElementById('pasteYearPrev').onclick=()=>{pasteTargetYear--;renderPasteGrid();};
 document.getElementById('pasteYearNext').onclick=()=>{pasteTargetYear++;renderPasteGrid();};
 document.getElementById('pasteModalCancel').onclick=closePasteModal;
 document.getElementById('pasteModal').addEventListener('click',e=>{if(e.target===document.getElementById('pasteModal'))closePasteModal();});
-document.getElementById('pasteModalConfirm').onclick=async()=>{
-  if(!clipboard)return;
-  const tk=monthKey(pasteTargetYear,pasteTargetMonth);
-  await loadMonthFromSheets(tk);
-  const target=getMonthData(tk);
-  const newItems=clipboard.items.map(x=>({...x,id:uid(),done:false}));
-  if(clipboard.type==='income') target.incomes=[...target.incomes,...newItems];
-  else target.expenses=[...target.expenses,...newItems];
-  await saveMonthToSheets(tk);
-  closePasteModal();
-  currentYear=pasteTargetYear; currentMonth=pasteTargetMonth;
-  renderAll();
-  showToast(`✓ วางรายการไปยัง ${MONTHS_TH[pasteTargetMonth]} ${pasteTargetYear+543} แล้ว`);
-};
+document.getElementById('pasteModalConfirm').onclick=async()=>{if(!clipboard)return;const tk=monthKey(pasteTargetYear,pasteTargetMonth);await loadMonthFromSheets(tk);const target=getMonthData(tk);const newItems=clipboard.items.map(x=>({...x,id:uid(),done:false}));if(clipboard.type==='income')target.incomes=[...target.incomes,...newItems];else target.expenses=[...target.expenses,...newItems];await saveMonthToSheets(tk);closePasteModal();currentYear=pasteTargetYear;currentMonth=pasteTargetMonth;renderAll();showToast(`✓ วางรายการไปยัง ${MONTHS_TH[pasteTargetMonth]} ${pasteTargetYear+543} แล้ว`);};
 document.getElementById('copyIncomeBtn').onclick=()=>openPasteModal('income');
 document.getElementById('copyExpenseBtn').onclick=()=>openPasteModal('expense');
 
-// Enter shortcuts
 ['incomeNameManual','incomeAmountManual'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('addIncomeManualBtn').click();}));
 ['incomeNameCalc','workDays'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('addIncomeCalcBtn').click();}));
 ['expenseName','expenseAmount','expenseDueDay'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('addExpenseBtn').click();}));
 
-// ── Init ──
-(async () => {
+// ── Init app (after PIN) ──
+async function initApp(){
   setSyncStatus('busy','กำลังโหลด...');
-  await Promise.all([loadMonthFromSheets(currentKey()), loadProfileFromSheets()]);
+  await Promise.all([loadMonthFromSheets(currentKey()),loadProfileFromSheets()]);
   setSyncStatus('ok','พร้อมใช้งาน');
   renderAll();
-})();
+}
+
+// ── Boot ──
+buildNumpad();
+if(sessionStorage.getItem(SESSION_KEY)==='1'){showMainApp();}
 </script>
 </body>
 </html>
