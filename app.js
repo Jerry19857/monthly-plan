@@ -143,7 +143,13 @@ async function saveMonthToSheets(key) {
   }
 }
 async function saveProfileToSheets() {
-  try { await writeSheet('ตั้งค่า',[['dailyWage','taxRate','pin'],[(profile.dailyWage||0),(profile.taxRate||0),'']]);} catch{}
+  try {
+    const existing = await readSheet('ตั้งค่า');
+    const pinRow = existing && existing.find(r=>r[0]==='pin');
+    const rows = [['dailyWage','taxRate','pin'],[(profile.dailyWage||0),(profile.taxRate||0),'']];
+    if (pinRow) rows.push(pinRow);
+    await writeSheet('ตั้งค่า', rows);
+  } catch {}
 }
 async function loadMonthFromSheets(key) {
   const rows = await readSheet(key);
@@ -321,4 +327,4 @@ async function initApp(){
 
 // ── Boot ──
 buildNumpad();
-if(sessionStorage.getItem(SESSION_KEY)==='1'){showMainApp();}
+if(sessionStorage.getItem(SESSION_KEY)){showMainApp();}
