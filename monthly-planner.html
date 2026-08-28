@@ -325,7 +325,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbztB8Vjp6wEL-KnEtC7o93lVVJj8GqHqa9UhBd-e-e0sPv7kn-K4C17jNV3hGLBmOjAnw/exec';
+const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwIFRJnRQPKI1d2bvtHm3nrWN0Dhw7sC331eTrQo5HvROiCLuxS7QPQvXAdZwj7mMstBw/exec';
 const SESSION_KEY = 'mp_session';
 
 const MONTHS_TH = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
@@ -352,19 +352,23 @@ function showToast(msg,dur=2000){const t=document.getElementById('toast');t.text
 function setSyncStatus(state,label){document.getElementById('syncDot').className='sync-dot '+state;document.getElementById('syncLabel').textContent=label;}
 
 // ── API ──
+function getToken() { return sessionStorage.getItem(SESSION_KEY); }
+
 async function writeSheet(sheetName, rows) {
   const res = await fetch(WEBAPP_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify({ sheet: sheetName, rows })
+    body: JSON.stringify({ sheet: sheetName, rows, token: getToken() })
   });
   const data = await res.json();
+  if (data.ok === false && data.error === 'unauthorized') { lockApp(); throw new Error('unauthorized'); }
   if (!data.ok) throw new Error('write failed');
 }
 async function readSheet(sheetName) {
   try {
-    const res = await fetch(`${WEBAPP_URL}?sheet=${encodeURIComponent(sheetName)}`);
+    const res = await fetch(`${WEBAPP_URL}?sheet=${encodeURIComponent(sheetName)}&token=${encodeURIComponent(getToken()||'')}`);
     const data = await res.json();
+    if (data.ok === false && data.error === 'unauthorized') { lockApp(); return null; }
     return data.values || [];
   } catch { return null; }
 }
@@ -417,7 +421,7 @@ async function verifyPin(pin) {
     const data = await res.json();
     loading.textContent = '';
     if (data.ok) {
-      sessionStorage.setItem(SESSION_KEY, '1');
+      sessionStorage.setItem(SESSION_KEY, data.token);
       showMainApp();
     } else {
       pinInput = '';
