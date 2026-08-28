@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>วางแผนการเงิน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- PIN Screen -->
+<div id="pinScreen">
+  <div class="pin-card">
+    <div class="pin-icon">🔐</div>
+    <div class="pin-title">วางแผนการเงิน</div>
+    <div class="pin-subtitle">ใส่ PIN เพื่อเข้าใช้งาน</div>
+    <div class="pin-dots" id="pinDots">
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+    </div>
+    <div class="pin-numpad" id="pinNumpad"></div>
+    <div class="pin-error" id="pinError"></div>
+    <div class="pin-loading" id="pinLoading"></div>
+  </div>
+</div>
+
+<!-- Main App -->
+<div id="mainApp">
+  <div class="app">
+    <div class="app-header">
+      <div class="header-top">
+        <div class="header-title">💰 วางแผนการเงิน</div>
+        <div class="header-right">
+          <div class="sync-status">
+            <div class="sync-dot" id="syncDot"></div>
+            <span id="syncLabel" style="color:var(--overlay1)">—</span>
+          </div>
+          <button class="logout-btn" id="logoutBtn" title="ออกจากระบบ">🔒 ล็อค</button>
+        </div>
+      </div>
+      <div class="month-nav">
+        <button class="nav-btn" id="prevMonthBtn">‹</button>
+        <div class="month-label" id="monthLabel">—</div>
+        <button class="nav-btn" id="nextMonthBtn">›</button>
+      </div>
+    </div>
+
+    <div class="card summary-card">
+      <div class="card-title"><span class="dot" style="background:var(--mauve)"></span>สรุปภาพรวม</div>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-item-label">รายได้คาดการณ์</div>
+          <div class="summary-item-value" style="color:var(--green)" id="sumIncome">฿0</div>
+          <div class="summary-item-sub" id="sumIncomeReceived">ได้รับแล้ว ฿0</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-item-label">รายจ่ายทั้งหมด</div>
+          <div class="summary-item-value" style="color:var(--maroon)" id="sumExpense">฿0</div>
+          <div class="summary-item-sub" id="sumExpensePaid">จ่ายแล้ว ฿0</div>
+        </div>
+      </div>
+      <div class="balance-block">
+        <div>
+          <div class="balance-label">ยอดคงเหลือคาดการณ์</div>
+          <div class="balance-value" id="balanceValue">฿0</div>
+        </div>
+        <span class="badge" id="balanceBadge">—</span>
+      </div>
+      <div id="copyBanner" style="display:none;margin-top:12px;">
+        <button class="btn btn-copy" id="copyFromPrevBtn">📋 คัดลอกรายการจากเดือนก่อนหน้า</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title-row">
+        <div class="card-title"><span class="dot" style="background:var(--green)"></span>รายได้เดือนนี้</div>
+        <button class="btn btn-copy btn-sm" id="copyIncomeBtn">📋 คัดลอกรายได้</button>
+      </div>
+      <button class="settings-toggle" id="settingsToggle">⚙ ค่าแรงต่อวัน & ภาษี <span id="settingsChevron">▾</span></button>
+      <div class="settings-body" id="settingsBody">
+        <div class="settings-row">
+          <div class="field-group">
+            <div class="field-label">ค่าแรงต่อวัน (บาท)</div>
+            <input type="number" id="dailyWage" placeholder="เช่น 800" min="0">
+          </div>
+          <div class="field-group">
+            <div class="field-label">ภาษีหัก ณ ที่จ่าย (%)</div>
+            <input type="number" id="taxRate" placeholder="เช่น 3" min="0" max="100" step="0.1">
+          </div>
+          <button class="btn btn-ghost btn-sm" id="saveProfileBtn" style="margin-bottom:1px">บันทึก</button>
+        </div>
+        <div style="margin-top:8px;font-size:.75rem;color:var(--overlay1)" id="profileStatus"></div>
+        <hr class="divider">
+      </div>
+      <div class="mode-tabs">
+        <button class="mode-tab active" data-mode="manual">กรอกเอง</button>
+        <button class="mode-tab" data-mode="calc">คำนวณจากวันทำงาน</button>
+      </div>
+      <div id="modeManual" class="add-form">
+        <div class="add-row">
+          <input type="text" id="incomeNameManual" placeholder="ชื่อรายการรายได้" style="flex:2">
+          <input type="number" id="incomeAmountManual" placeholder="จำนวน (บาท)" style="flex:1">
+        </div>
+        <button class="btn btn-green btn-sm" id="addIncomeManualBtn">+ เพิ่มรายได้</button>
+      </div>
+      <div id="modeCalc" class="add-form" style="display:none">
+        <div class="add-row">
+          <input type="text" id="incomeNameCalc" placeholder="ชื่อรายการ" style="flex:2">
+          <input type="number" id="workDays" placeholder="จำนวนวัน" style="flex:1" min="0">
+        </div>
+        <div class="preview-box" id="calcPreview"></div>
+        <button class="btn btn-green btn-sm" id="addIncomeCalcBtn">+ เพิ่มรายได้</button>
+      </div>
+      <hr class="divider">
+      <div class="item-list" id="incomeList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title-row">
+        <div class="card-title"><span class="dot" style="background:var(--maroon)"></span>รายจ่ายเดือนนี้</div>
+        <button class="btn btn-copy btn-sm" id="copyExpenseBtn">📋 คัดลอกรายจ่าย</button>
+      </div>
+      <div class="add-form">
+        <div class="add-row">
+          <input type="text" id="expenseName" placeholder="ชื่อรายการ" style="flex:2">
+          <input type="number" id="expenseAmount" placeholder="จำนวน (บาท)" style="flex:1">
+        </div>
+        <div class="add-row" style="align-items:center">
+          <div class="field-group">
+            <div class="field-label">วันที่กำหนดจ่าย (ไม่บังคับ)</div>
+            <input type="number" id="expenseDueDay" placeholder="วันที่ 1-31" min="1" max="31">
+          </div>
+          <button class="btn btn-primary btn-sm" id="addExpenseBtn" style="margin-top:16px">+ เพิ่มรายจ่าย</button>
+        </div>
+      </div>
+      <hr class="divider">
+      <div class="item-list" id="expenseList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="pasteModal">
+  <div class="modal">
+    <div class="modal-title" id="pasteModalTitle">วางรายการไปยังเดือน</div>
+    <div class="modal-body">
+      <div style="font-size:.8rem;color:var(--subtext0)" id="pasteModalDesc"></div>
+      <div class="year-row">
+        <button class="nav-btn" id="pasteYearPrev">‹</button>
+        <div class="year-val" id="pasteYearLabel">—</div>
+        <button class="nav-btn" id="pasteYearNext">›</button>
+      </div>
+      <div class="month-grid" id="pasteMonthGrid"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" id="pasteModalCancel">ยกเลิก</button>
+      <button class="btn btn-primary btn-sm" id="pasteModalConfirm">วางรายการ</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
