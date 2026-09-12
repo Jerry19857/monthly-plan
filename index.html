@@ -35,7 +35,7 @@
   <div class="app">
     <div class="app-header">
       <div class="header-top">
-        <div class="header-title">💰 วางแผนการเงิน</div>
+        <div class="header-title" id="appTitle">💰 วางแผนการเงิน</div>
         <div class="header-right">
           <div class="sync-status">
             <div class="sync-dot" id="syncDot"></div>
@@ -44,12 +44,14 @@
           <button class="logout-btn" id="logoutBtn" title="ออกจากระบบ">🔒 ล็อค</button>
         </div>
       </div>
-      <div class="month-nav">
+      <div class="month-nav" id="monthNav">
         <button class="nav-btn" id="prevMonthBtn">‹</button>
         <div class="month-label" id="monthLabel">—</div>
         <button class="nav-btn" id="nextMonthBtn">›</button>
       </div>
     </div>
+
+    <div class="tab-page" id="tabPlan">
 
     <div class="card summary-card">
       <div class="card-title"><span class="dot" style="background:var(--mauve)"></span>สรุปภาพรวม</div>
@@ -142,7 +144,79 @@
       <hr class="divider">
       <div class="item-list" id="expenseList"></div>
     </div>
+
+    </div>
+
+    <div class="tab-page" id="tabCalendar" style="display:none">
+      <div class="card">
+        <div class="card-title-row">
+          <div class="card-title"><span class="dot" style="background:var(--blue)"></span>ปฏิทิน</div>
+        </div>
+        <div class="cal-nav">
+          <button class="nav-btn" id="calPrevBtn">‹</button>
+          <div class="month-label" id="calMonthLabel">—</div>
+          <button class="nav-btn" id="calNextBtn">›</button>
+        </div>
+        <div class="cal-weekdays">
+          <span>อา</span><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span>ส</span>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+      <div class="card">
+        <div class="card-title" id="calNoteTitle"><span class="dot" style="background:var(--mauve)"></span>บันทึกประจำวัน</div>
+        <textarea id="calNoteText" class="cal-note-input" rows="4" placeholder="วันนี้ต้องทำอะไรบ้าง..."></textarea>
+        <button class="btn btn-primary btn-sm" id="calNoteSaveBtn" style="margin-top:10px">บันทึก</button>
+      </div>
+    </div>
+
+    <div class="tab-page" id="tabTodo" style="display:none">
+      <div class="card">
+        <div class="card-title-row">
+          <div class="card-title"><span class="dot" style="background:var(--green)"></span>งานที่ต้องทำ</div>
+        </div>
+        <div class="add-row">
+          <input type="text" id="todoNameInput" placeholder="ต้องทำอะไร..." style="flex:1">
+          <button class="btn btn-green btn-sm" id="addTodoBtn">+ เพิ่ม</button>
+        </div>
+        <hr class="divider">
+        <div class="item-list" id="todoList"></div>
+      </div>
+    </div>
+
+    <div class="tab-page" id="tabSettings" style="display:none">
+      <div class="card">
+        <div class="card-title"><span class="dot" style="background:var(--peach)"></span>ค่าแรง & ภาษี</div>
+        <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:12px">
+          <div class="field-group">
+            <div class="field-label">ค่าแรงต่อวัน (บาท)</div>
+            <input type="number" id="dailyWage2" placeholder="เช่น 800" min="0">
+          </div>
+          <div class="field-group">
+            <div class="field-label">ภาษีหัก ณ ที่จ่าย (%)</div>
+            <input type="number" id="taxRate2" placeholder="เช่น 3" min="0" max="100" step="0.1">
+          </div>
+          <button class="btn btn-primary btn-sm" id="saveProfileBtn2">บันทึก</button>
+        </div>
+        <div style="margin-top:10px;font-size:.75rem;color:var(--overlay1)" id="profileStatus2"></div>
+      </div>
+      <div class="card">
+        <button class="btn btn-ghost" id="lockAppBtn2" style="width:100%;color:var(--red)">🔒 ล็อกแอป</button>
+      </div>
+      <div class="card">
+        <div style="font-size:.78rem;color:var(--overlay0);line-height:1.6">
+          ข้อมูลทั้งหมด (วางแผนรายเดือน / ปฏิทิน / งานที่ต้องทำ / ค่าแรง-ภาษี) sync ขึ้น Google Sheet ทุกอย่าง
+        </div>
+      </div>
+    </div>
+
   </div>
+
+  <nav class="bottom-nav">
+    <button class="bn-btn active" data-tab="plan"><span class="bn-icon">💰</span><span>วางแผน</span></button>
+    <button class="bn-btn" data-tab="calendar"><span class="bn-icon">📅</span><span>ปฏิทิน</span></button>
+    <button class="bn-btn" data-tab="todo"><span class="bn-icon">✅</span><span>งาน</span></button>
+    <button class="bn-btn" data-tab="settings"><span class="bn-icon">⚙️</span><span>ตั้งค่า</span></button>
+  </nav>
 </div>
 
 <div class="modal-overlay" id="pasteModal">

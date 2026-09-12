@@ -10,6 +10,14 @@ let incomeMode = 'manual', clipboard = null;
 let pasteTargetYear = currentYear, pasteTargetMonth = currentMonth;
 let saveTimer = null;
 
+let activeTab = 'plan';
+let calendarNotes = {}, calendarLoaded = false, calNoteSaveTimer = null;
+let calYear = currentYear, calMonth = currentMonth, calSelectedDate = new Date();
+let todos = [], todosLoaded = false, todoSaveTimer = null;
+const TAB_TITLES = { plan: '💰 วางแผนการเงิน', calendar: '📅 ปฏิทิน', todo: '✅ งานที่ต้องทำ', settings: '⚙️ ตั้งค่า' };
+function pad2(n) { return String(n).padStart(2, '0'); }
+function dateKey(y, m, d) { return `${y}-${pad2(m + 1)}-${pad2(d)}`; }
+
 function monthKey(y, m) { return MONTHS_TH[m]; }
 function currentKey() { return monthKey(currentYear, currentMonth); }
 function prevKey() { let m=currentMonth-1,y=currentYear; if(m<0){m=11;y--;} return monthKey(y,m); }
@@ -232,6 +240,8 @@ function updateProfileUI(){
   document.getElementById('dailyWage').value=profile.dailyWage||'';
   document.getElementById('taxRate').value=profile.taxRate||'';
   if(profile.dailyWage)document.getElementById('profileStatus').textContent=`ค่าแรงต่อวัน: ${fmt(profile.dailyWage)} | ภาษี: ${profile.taxRate||0}%`;
+  document.getElementById('dailyWage2').value=profile.dailyWage||'';
+  document.getElementById('taxRate2').value=profile.taxRate||'';
 }
 
 // ── Inline edit ──
@@ -289,6 +299,161 @@ document.getElementById('saveProfileBtn').onclick=async()=>{
   document.getElementById('profileStatus').textContent=`✓ บันทึกแล้ว — ค่าแรง ${fmt(profile.dailyWage)} / ภาษี ${profile.taxRate}%`;
   setTimeout(()=>updateProfileUI(),2000);
 };
+document.getElementById('saveProfileBtn2').onclick=async()=>{
+  profile.dailyWage=+document.getElementById('dailyWage2').value||0;
+  profile.taxRate=+document.getElementById('taxRate2').value||0;
+  await saveProfileToSheets();
+  document.getElementById('profileStatus2').textContent=`✓ บันทึกแล้ว — ค่าแรง ${fmt(profile.dailyWage)} / ภาษี ${profile.taxRate}%`;
+  setTimeout(()=>updateProfileUI(),2000);
+};
+document.getElementById('lockAppBtn2').onclick=lockApp;
+
+// ── Tab navigation ──
+function switchTab(name){
+  activeTab=name;
+  document.querySelectorAll('.tab-page').forEach(el=>el.style.display='none');
+  document.getElementById('tab'+name.charAt(0).toUpperCase()+name.slice(1)).style.display='block';
+  document.querySelectorAll('.bn-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+  document.getElementById('appTitle').textContent=TAB_TITLES[name];
+  document.getElementById('monthNav').style.display=name==='plan'?'flex':'none';
+  if(name==='calendar'&&!calendarLoaded){calendarLoaded=true;loadCalendarNotes().then(renderCalendarTab);}
+  else if(name==='calendar'){renderCalendarTab();}
+  if(name==='todo'&&!todosLoaded){todosLoaded=true;loadTodos().then(renderTodoList);}
+}
+document.querySelectorAll('.bn-btn').forEach(btn=>{btn.onclick=()=>switchTab(btn.dataset.tab);});
+
+// ── Calendar tab ──
+async function loadCalendarNotes(){
+  setSyncStatus('busy','กำลังโหลด...');
+  const rows=await readSheet('ปฏิทิน');
+  calendarNotes={};
+  if(rows&&rows.length>1){
+    for(let i=1;i<rows.length;i++){
+      const [date,note]=rows[i];
+      if(date&&note)calendarNotes[date]=note;
+    }
+  }
+  setSyncStatus('ok','พร้อมใช้งาน');
+}
+function scheduleCalSave(){
+  clearTimeout(calNoteSaveTimer);
+  calNoteSaveTimer=setTimeout(async()=>{
+    setSyncStatus('busy','กำลังบันทึก...');
+    try{
+      const rows=[['date','note']];
+      for(const k of Object.keys(calendarNotes).sort())rows.push([k,calendarNotes[k]]);
+      await writeSheet('ปฏิทิน',rows);
+      setSyncStatus('ok','บันทึกแล้ว');
+    }catch{setSyncStatus('err','บันทึกไม่สำเร็จ');showToast('❌ บันทึกไม่สำเร็จ');}
+  },800);
+}
+function renderCalendarTab(){
+  document.getElementById('calMonthLabel').textContent=`${MONTHS_TH[calMonth]} ${calYear+543}`;
+  const first=new Date(calYear,calMonth,1);
+  const startDow=first.getDay();
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const today=new Date();
+  let html='';
+  for(let i=0;i<startDow;i++)html+='<div class="cal-day empty"></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    const key=dateKey(calYear,calMonth,d);
+    const isToday=today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d;
+    const isSelected=calSelectedDate.getFullYear()===calYear&&calSelectedDate.getMonth()===calMonth&&calSelectedDate.getDate()===d;
+    html+=`<div class="cal-day ${isToday?'today':''} ${isSelected?'selected':''}" data-d="${d}">${d}${calendarNotes[key]?'<span class="cal-dot"></span>':''}</div>`;
+  }
+  document.getElementById('calGrid').innerHTML=html;
+  document.getElementById('calGrid').querySelectorAll('.cal-day[data-d]').forEach(el=>{
+    el.onclick=()=>{calSelectedDate=new Date(calYear,calMonth,+el.dataset.d);renderCalendarTab();updateCalNoteBox();};
+  });
+  updateCalNoteBox();
+}
+function updateCalNoteBox(){
+  const key=dateKey(calSelectedDate.getFullYear(),calSelectedDate.getMonth(),calSelectedDate.getDate());
+  document.getElementById('calNoteTitle').innerHTML=`<span class="dot" style="background:var(--mauve)"></span>บันทึกวันที่ ${calSelectedDate.getDate()}/${calSelectedDate.getMonth()+1}/${calSelectedDate.getFullYear()+543}`;
+  document.getElementById('calNoteText').value=calendarNotes[key]||'';
+}
+document.getElementById('calPrevBtn').onclick=()=>{calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCalendarTab();};
+document.getElementById('calNextBtn').onclick=()=>{calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendarTab();};
+document.getElementById('calNoteSaveBtn').onclick=()=>{
+  const key=dateKey(calSelectedDate.getFullYear(),calSelectedDate.getMonth(),calSelectedDate.getDate());
+  const text=document.getElementById('calNoteText').value.trim();
+  if(text)calendarNotes[key]=text;else delete calendarNotes[key];
+  renderCalendarTab();
+  scheduleCalSave();
+  showToast('✓ บันทึกแล้ว');
+};
+
+// ── Todo tab ──
+async function loadTodos(){
+  setSyncStatus('busy','กำลังโหลด...');
+  const rows=await readSheet('งานที่ต้องทำ');
+  todos=[];
+  if(rows&&rows.length>1){
+    for(let i=1;i<rows.length;i++){
+      const [id,title,done,dueDate,createdAt,sortOrder]=rows[i];
+      if(!id)continue;
+      todos.push({id,title:title||'',done:done==='1',dueDate:dueDate||null,createdAt:createdAt||'',sortOrder:+sortOrder||0});
+    }
+  }
+  setSyncStatus('ok','พร้อมใช้งาน');
+}
+function scheduleTodoSave(){
+  clearTimeout(todoSaveTimer);
+  todoSaveTimer=setTimeout(async()=>{
+    setSyncStatus('busy','กำลังบันทึก...');
+    try{
+      const rows=[['id','title','done','dueDate','createdAt','sortOrder']];
+      for(const t of todos)rows.push([t.id,t.title,t.done?'1':'0',t.dueDate||'',t.createdAt,t.sortOrder]);
+      await writeSheet('งานที่ต้องทำ',rows);
+      setSyncStatus('ok','บันทึกแล้ว');
+    }catch{setSyncStatus('err','บันทึกไม่สำเร็จ');showToast('❌ บันทึกไม่สำเร็จ');}
+  },800);
+}
+function renderTodoList(){
+  const list=document.getElementById('todoList');
+  if(!todos.length){list.innerHTML='<div class="empty-state">ยังไม่มีงาน</div>';return;}
+  const sorted=[...todos].sort((a,b)=>(a.done===b.done?a.sortOrder-b.sortOrder:a.done?1:-1));
+  list.innerHTML=sorted.map(t=>`<div class="item todo-item ${t.done?'done':''}">
+    <button class="todo-check ${t.done?'checked':''}" data-action="toggle" data-id="${t.id}">${chk('var(--green)')}</button>
+    <span class="item-name">${escHtml(t.title)}</span>
+    <div class="item-actions">
+      <button class="item-btn edit" data-action="edit" data-id="${t.id}">✎</button>
+      <button class="item-btn delete" data-action="delete" data-id="${t.id}">✕</button>
+    </div></div>`).join('');
+}
+function openTodoEdit(id){
+  const t=todos.find(x=>x.id===id);if(!t)return;
+  const list=document.getElementById('todoList');
+  let targetEl=null;
+  list.querySelectorAll('.item').forEach(el=>{if(el.querySelector(`[data-action="edit"][data-id="${id}"]`))targetEl=el;});
+  if(!targetEl)return;
+  const nameSpan=targetEl.querySelector('.item-name'),actions=targetEl.querySelector('.item-actions');
+  const ni=Object.assign(document.createElement('input'),{type:'text',value:t.title,style:'flex:1'});
+  nameSpan.replaceWith(ni);ni.focus();ni.select();
+  const sb=Object.assign(document.createElement('button'),{className:'item-btn',textContent:'✓',style:'color:var(--green)'});
+  const cb=Object.assign(document.createElement('button'),{className:'item-btn',textContent:'✕',style:'color:var(--overlay0)'});
+  actions.innerHTML='';actions.appendChild(sb);actions.appendChild(cb);
+  function doSave(){const v=ni.value.trim();if(!v)return;t.title=v;renderTodoList();scheduleTodoSave();}
+  sb.onclick=doSave;cb.onclick=()=>renderTodoList();
+  ni.addEventListener('keydown',e=>{if(e.key==='Enter')doSave();if(e.key==='Escape')renderTodoList();});
+}
+document.getElementById('todoList').addEventListener('click',e=>{
+  const btn=e.target.closest('[data-action]');if(!btn)return;
+  const {action,id}=btn.dataset,t=todos.find(x=>x.id===id);if(!t&&action!=='edit')return;
+  if(action==='toggle'){t.done=!t.done;renderTodoList();scheduleTodoSave();}
+  else if(action==='delete'){todos=todos.filter(x=>x.id!==id);renderTodoList();scheduleTodoSave();}
+  else if(action==='edit')openTodoEdit(id);
+});
+function addTodo(){
+  const input=document.getElementById('todoNameInput');
+  const title=input.value.trim();if(!title)return;
+  todos.push({id:uid(),title,done:false,dueDate:null,createdAt:new Date().toISOString(),sortOrder:Date.now()});
+  input.value='';
+  renderTodoList();
+  scheduleTodoSave();
+}
+document.getElementById('addTodoBtn').onclick=addTodo;
+document.getElementById('todoNameInput').addEventListener('keydown',e=>{if(e.key==='Enter')addTodo();});
 
 // ── Mode tabs ──
 document.querySelectorAll('.mode-tab').forEach(btn=>{btn.onclick=()=>{document.querySelectorAll('.mode-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');incomeMode=btn.dataset.mode;document.getElementById('modeManual').style.display=incomeMode==='manual'?'flex':'none';document.getElementById('modeCalc').style.display=incomeMode==='calc'?'flex':'none';};});
