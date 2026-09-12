@@ -493,3 +493,4 @@ async function initApp(){
 // ── Boot ──
 buildNumpad();
 if(sessionStorage.getItem(SESSION_KEY)){showMainApp();}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
